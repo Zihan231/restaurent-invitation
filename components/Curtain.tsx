@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
 import VelvetCurtain from "./VelvetCurtain";
+import { EVENT } from "@/lib/event";
 
 type Props = {
   onOpenStart: () => void;
@@ -85,7 +86,7 @@ export default function Curtain({ onOpenStart, onOpenComplete }: Props) {
           <span>Grand</span>
           <span>Opening</span>
         </h1>
-        <p className="seal__date">9 · 10 · 2026</p>
+        <p className="seal__date">{EVENT.dateLabel}</p>
         <motion.button
           type="button"
           className="seal__btn"

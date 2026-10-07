@@ -280,7 +280,9 @@ html[data-freeze] .seal {
 .seal__date {
   margin: 8px 0 28px;
   font-family: var(--font-display), serif;
-  letter-spacing: 0.3em;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   color: var(--gold-2);
 }
 .seal__btn {
