@@ -7,6 +7,7 @@ import Curtain from "./Curtain";
 import Countdown from "./Countdown";
 import { EVENT, mapsUrl } from "@/lib/event";
 import { celebrate } from "@/lib/confetti";
+import { playFanfare } from "@/lib/fanfare";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -99,6 +100,7 @@ export default function Invitation() {
   }, [stage]);
 
   const handleOpenStart = useCallback(() => {
+    playFanfare(); // inside the tap, as mobile browsers require for audio
     setStage("opening");
     window.scrollTo(0, 0);
     setTimeout(celebrate, 1100);
