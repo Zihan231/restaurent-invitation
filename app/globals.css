@@ -947,18 +947,30 @@ html[data-freeze] .seal {
     font-size: 1.1rem;
   }
   .experience {
-    max-width: 1120px;
+    width: 100%;
+    height: 100svh;
+    min-height: 560px;
     margin: 0 auto;
-    padding: 12px 0 76px;
+    padding: clamp(24px, 4svh, 48px) 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
   .experience__intro {
-    margin-bottom: 34px;
+    flex: none;
+    margin-bottom: clamp(18px, 2.5svh, 30px);
   }
   .experience__title {
-    font-size: clamp(2.4rem, 4vw, 3.5rem);
+    font-size: clamp(2rem, 5svh, 3.5rem);
+  }
+  .experience__copy {
+    margin-top: clamp(8px, 1.4svh, 14px);
   }
   .experience__frame {
-    padding: 18px;
+    /* 105svh keeps the complete 16:9 film plus its heading inside short laptop screens. */
+    width: min(1120px, calc(100vw - 64px), 105svh);
+    margin: 0 auto;
+    padding: clamp(12px, 1.8svh, 18px);
     border-radius: 28px;
   }
   .experience__frame::before {
