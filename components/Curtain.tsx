@@ -40,8 +40,8 @@ export default function Curtain({ onOpenStart, onOpenComplete }: Props) {
         />
       )}
 
-      {/* CSS drapes: placeholder until WebGL draws, and fallback when it is unavailable */}
-      {gl !== "ok" && (
+      {/* CSS drapes: only a fallback when WebGL is unavailable (not shown while loading, to avoid a flash) */}
+      {gl === "none" && (
         <>
           <motion.div
             className="drape drape--left"

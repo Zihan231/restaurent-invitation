@@ -118,7 +118,7 @@ button {
   height: 100%;
   display: block;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.6s ease;
 }
 .has-gl .velvet {
   opacity: 1;
