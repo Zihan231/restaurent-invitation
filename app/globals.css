@@ -467,6 +467,30 @@ html[data-freeze] .seal {
   }
 }
 
+/* Hero layering: light rays at the very back, building above them,
+   all text / logo / ribbon / side panels on top of both. */
+.hero__visual {
+  z-index: 1;
+}
+.rays {
+  z-index: 0;
+}
+.hero__building {
+  z-index: 1;
+}
+.sparkles {
+  z-index: 2;
+}
+.hero__logo,
+.hero__title,
+.hero__ribbon,
+.hero__name,
+.scroll-cue,
+.hero__side {
+  position: relative;
+  z-index: 2;
+}
+
 .hero__name {
   margin: -6px 0 0;
   font-family: var(--font-display), serif;
