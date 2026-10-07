@@ -22,6 +22,15 @@ const zoom: Variants = {
   hidden: { opacity: 0, scale: 0.86 },
   show: { opacity: 1, scale: 1, transition: { duration: 1.4, ease: EASE } },
 };
+// Desktop-only side panels glide in from behind the drapes.
+const fromLeft: Variants = {
+  hidden: { opacity: 0, x: -60 },
+  show: { opacity: 1, x: 0, transition: { duration: 1.1, ease: EASE } },
+};
+const fromRight: Variants = {
+  hidden: { opacity: 0, x: 60 },
+  show: { opacity: 1, x: 0, transition: { duration: 1.1, ease: EASE } },
+};
 const unfurl: Variants = {
   hidden: { opacity: 0, scaleX: 0.2 },
   show: { opacity: 1, scaleX: 1, transition: { type: "spring", stiffness: 140, damping: 14 } },
@@ -130,6 +139,8 @@ export default function Invitation() {
           initial="hidden"
           animate={revealed ? "show" : "hidden"}
         >
+          {/* On phones this wrapper is display: contents, so the column layout is unchanged */}
+          <div className="hero__center">
           <motion.div variants={rise} className="hero__logo">
             <Image src="/images/logo.webp" alt="Water Park logo" width={480} height={333} priority />
           </motion.div>
@@ -168,6 +179,34 @@ export default function Invitation() {
           <motion.a variants={rise} href="#details" className="scroll-cue" aria-label="Scroll to details">
             <span />
           </motion.a>
+          </div>
+
+          {/* Wide screens: fill the stage on either side of the building */}
+          <motion.aside variants={fromLeft} className="hero__side hero__side--left">
+            <p className="eyebrow">You are cordially invited</p>
+            <Ornament />
+            <p className="side__lead">We are delighted to invite you to the</p>
+            <p className="side__title gold-text">Grand Opening Ceremony</p>
+            <p className="side__tag">
+              Dining • Celebration
+              <br />
+              Events &amp; Entertainment
+            </p>
+          </motion.aside>
+          <motion.aside variants={fromRight} className="hero__side hero__side--right">
+            <p className="eyebrow">Save the date</p>
+            <p className="side__dow">{EVENT.dayLabel}</p>
+            <p className="side__big">09</p>
+            <p className="side__month">October 2026</p>
+            <p className="side__time">{EVENT.timeLabel}</p>
+            <Ornament />
+            <p className="side__place">
+              <PinIcon /> Uttara, Dhaka
+            </p>
+            <a href="#details" className="btn btn--outline side__btn">
+              View Details
+            </a>
+          </motion.aside>
         </motion.section>
 
         {/* ---------- MESSAGE ---------- */}
@@ -186,6 +225,8 @@ export default function Invitation() {
           <Ornament flip />
         </motion.section>
 
+        {/* Date / venue / RSVP: stacked on phones, side by side on wide screens */}
+        <div className="cards">
         {/* ---------- DATE ---------- */}
         <motion.section className="card date" {...reveal}>
           <p className="eyebrow">Save the date</p>
@@ -253,6 +294,7 @@ export default function Invitation() {
             </span>
           </a>
         </motion.section>
+        </div>
 
         {/* ---------- FOOTER ---------- */}
         <motion.footer className="footer" {...reveal}>
