@@ -63,3 +63,51 @@ await keyOutBorderWhite(`${SRC}/logo-01.png`, { left: 250, top: 1075, width: 197
 // Social share preview
 await sharp(`${SRC}/Card.png`).resize({ width: 1200 }).jpeg({ quality: 82 }).toFile(`${OUT}/og-card.jpg`);
 console.log("done");
+
+// ---- Favicons: gold artwork from inside the logo oval, on a dark square ----
+const ART = { left: 590, top: 1300, width: 1300, height: 920 }; // gold mark, fully inside the black oval
+const DARK = { r: 11, g: 7, b: 9, alpha: 1 };
+
+async function iconPng(size, { rounded, fill, ring = rounded }) {
+  const artW = Math.round(size * fill);
+  const art = await sharp(`${SRC}/logo-01.png`).extract(ART).resize({ width: artW }).toBuffer();
+  const meta = await sharp(art).metadata();
+  const r = rounded ? Math.round(size * 0.22) : 0;
+  const bg = Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">` +
+      `<rect width="${size}" height="${size}" rx="${r}" fill="rgb(${DARK.r},${DARK.g},${DARK.b})"/>` +
+      (ring ? `<rect x="${size * 0.03}" y="${size * 0.03}" width="${size * 0.94}" height="${size * 0.94}" rx="${r * 0.9}" fill="none" stroke="#d4a437" stroke-opacity="0.55" stroke-width="${Math.max(1, size * 0.018)}"/>` : "") +
+      `</svg>`
+  );
+  return sharp(bg)
+    .composite([{ input: art, left: Math.round((size - artW) / 2), top: Math.round((size - meta.height) / 2) }])
+    .png()
+    .toBuffer();
+}
+
+// Multi-size .ico built from PNG entries (supported by all modern browsers).
+function toIco(pngs) {
+  const header = Buffer.alloc(6 + 16 * pngs.length);
+  header.writeUInt16LE(0, 0);
+  header.writeUInt16LE(1, 2);
+  header.writeUInt16LE(pngs.length, 4);
+  let offset = header.length;
+  pngs.forEach(({ size, buf }, i) => {
+    const e = 6 + i * 16;
+    header.writeUInt8(size >= 256 ? 0 : size, e);
+    header.writeUInt8(size >= 256 ? 0 : size, e + 1);
+    header.writeUInt16LE(1, e + 4);
+    header.writeUInt16LE(32, e + 6);
+    header.writeUInt32LE(buf.length, e + 8);
+    header.writeUInt32LE(offset, e + 12);
+    offset += buf.length;
+  });
+  return Buffer.concat([header, ...pngs.map((p) => p.buf)]);
+}
+
+const { writeFileSync } = await import("node:fs");
+const small = await Promise.all([16, 32, 48].map(async (size) => ({ size, buf: await iconPng(size, { rounded: true, fill: size < 48 ? 1 : 0.92, ring: size >= 48 }) })));
+writeFileSync("app/favicon.ico", toIco(small));
+writeFileSync("app/icon.png", await iconPng(512, { rounded: true, fill: 0.82 }));
+writeFileSync("app/apple-icon.png", await iconPng(180, { rounded: false, fill: 0.8 })); // iOS rounds it itself
+console.log("icons written");
