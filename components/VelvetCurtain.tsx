@@ -61,8 +61,9 @@ float openWidth(float y) {
     float k = (uTieY - y) / uTieY;
     return tw + (uShape.x - tw) * pow(k, 1.7);
   }
+  // below the rope the fabric flares out quickly, then falls straight to the floor
   float k = (y - uTieY) / (1.0 - uTieY);
-  return tw + (uShape.z - tw) * pow(k, 1.25);
+  return tw + (uShape.z - tw) * sin(k * PI * 0.5);
 }
 
 // Inner edge of a drape at height y, as a fraction of the screen width.
