@@ -111,6 +111,19 @@ button {
 .curtain-layer.is-opening {
   pointer-events: none;
 }
+/* Instant stand-in while the WebGL curtain boots: a still rendered from the shader itself,
+   so the live curtain fades in over an identical picture (no black flash, no style change). */
+.curtain-layer:not(.is-opening) {
+  background: #5c0710 url("/images/curtain-portrait.webp") center top / cover no-repeat;
+}
+@media (min-aspect-ratio: 1/1) {
+  .curtain-layer:not(.is-opening) {
+    background-image: url("/images/curtain-landscape.webp");
+  }
+}
+html[data-freeze] .curtain-layer {
+  background: none;
+}
 .velvet {
   position: absolute;
   inset: 0;

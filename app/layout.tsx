@@ -37,6 +37,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${cinzel.variable} ${cormorant.variable} ${montserrat.variable}`}>
       <head>
         <link rel="preload" as="image" href="/images/logo.webp" />
+        <link rel="preload" as="image" href="/images/curtain-portrait.webp" media="(max-aspect-ratio: 1/1)" />
+        <link rel="preload" as="image" href="/images/curtain-landscape.webp" media="(min-aspect-ratio: 1/1)" />
       </head>
       <body>{children}</body>
     </html>
