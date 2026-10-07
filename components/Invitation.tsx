@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion, type Variants } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Curtain from "./Curtain";
 import Countdown from "./Countdown";
 import { EVENT, mapsUrl } from "@/lib/event";
@@ -93,11 +93,56 @@ function saveTheDate() {
 export default function Invitation() {
   const [stage, setStage] = useState<"closed" | "opening" | "open">("closed");
   const [copied, setCopied] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const videoSectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Lock scrolling until the curtain is raised.
   useEffect(() => {
     document.documentElement.classList.toggle("locked", stage === "closed");
   }, [stage]);
+
+  // Start the film with sound once it becomes the focus of the viewport.
+  // The opening-curtain tap counts as a prior user interaction in browsers
+  // that require one before allowing audible playback.
+  useEffect(() => {
+    const section = videoSectionRef.current;
+    const video = videoRef.current;
+    if (!section || !video || !("IntersectionObserver" in window)) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.muted = false;
+          video.volume = 1;
+          void video
+            .play()
+            .then(() => setAutoplayBlocked(false))
+            .catch(() => setAutoplayBlocked(true));
+        } else if (!video.paused) {
+          video.pause();
+        }
+      },
+      { threshold: 0.55 },
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  const playVideoWithSound = useCallback(async () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = false;
+    video.volume = 1;
+    try {
+      await video.play();
+      setAutoplayBlocked(false);
+    } catch {
+      setAutoplayBlocked(true);
+    }
+  }, []);
 
   const handleOpenStart = useCallback(() => {
     playFanfare(); // inside the tap, as mobile browsers require for audio
@@ -228,7 +273,7 @@ export default function Invitation() {
         </motion.section>
 
         {/* ---------- EXPERIENCE FILM ---------- */}
-        <motion.section className="experience" aria-labelledby="experience-title" {...reveal}>
+        <motion.section ref={videoSectionRef} className="experience" aria-labelledby="experience-title" {...reveal}>
           <div className="experience__intro">
             <p className="eyebrow">Discover the destination</p>
             <h2 className="experience__title gold-text" id="experience-title">
@@ -243,16 +288,24 @@ export default function Invitation() {
             <span className="experience__crest" aria-hidden>Our Story</span>
             <div className="experience__screen">
               <video
+                ref={videoRef}
                 className="experience__video"
                 controls
                 playsInline
                 preload="metadata"
                 poster="/images/building.webp"
                 aria-label="A video tour of Water Park Restaurant and Party Center"
+                onPlay={() => setAutoplayBlocked(false)}
               >
                 <source src="/videos/water-park.mp4" type="video/mp4" />
                 Your browser does not support embedded video.
               </video>
+              {autoplayBlocked && (
+                <button type="button" className="experience__play" onClick={playVideoWithSound}>
+                  <span className="experience__play-icon" aria-hidden>▶</span>
+                  Play with sound
+                </button>
+              )}
             </div>
           </div>
         </motion.section>
