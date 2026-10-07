@@ -227,6 +227,36 @@ export default function Invitation() {
           <Ornament flip />
         </motion.section>
 
+        {/* ---------- EXPERIENCE FILM ---------- */}
+        <motion.section className="experience" aria-labelledby="experience-title" {...reveal}>
+          <div className="experience__intro">
+            <p className="eyebrow">Discover the destination</p>
+            <h2 className="experience__title gold-text" id="experience-title">
+              Step Inside Water Park
+            </h2>
+            <p className="experience__copy">
+              Take a glimpse inside the restaurant, where dining, celebration and entertainment come together.
+            </p>
+          </div>
+
+          <div className="experience__frame">
+            <span className="experience__crest" aria-hidden>Our Story</span>
+            <div className="experience__screen">
+              <video
+                className="experience__video"
+                controls
+                playsInline
+                preload="metadata"
+                poster="/images/building.webp"
+                aria-label="A video tour of Water Park Restaurant and Party Center"
+              >
+                <source src="/videos/water-park.mp4" type="video/mp4" />
+                Your browser does not support embedded video.
+              </video>
+            </div>
+          </div>
+        </motion.section>
+
         {/* Date / venue / RSVP: stacked on phones, side by side on wide screens */}
         <div className="cards">
         {/* ---------- DATE ---------- */}
