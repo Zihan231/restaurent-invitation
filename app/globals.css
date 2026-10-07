@@ -656,36 +656,44 @@ html[data-freeze] .seal {
   border-radius: 12px;
   background: #080608;
 }
+/* Shown while the film plays muted (iOS refused sound): a small pill, not a cover */
 .experience__play {
   position: absolute;
-  inset: 0;
+  right: 12px;
+  bottom: 56px; /* above the native controls bar */
   z-index: 2;
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: var(--gold-1);
-  background: rgba(8, 6, 8, 0.62);
-  backdrop-filter: blur(3px);
-  font-family: var(--font-display), serif;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-.experience__play-icon {
-  width: 58px;
-  height: 58px;
-  display: grid;
-  place-items: center;
-  padding-left: 4px;
-  border: 1px solid var(--gold-2);
-  border-radius: 50%;
+  gap: 8px;
+  padding: 8px 14px 8px 8px;
+  border-radius: 999px;
   color: #2a1606;
   background: var(--gold-grad);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
-  font-size: 1.15rem;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
+  font-family: var(--font-display), serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  animation: sound-pulse 2.2s ease-in-out infinite;
+}
+.experience__play-icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(42, 22, 6, 0.15);
+  font-size: 0.9rem;
+}
+@keyframes sound-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
 }
 .experience__play:focus-visible {
   outline: 3px solid var(--gold-2);

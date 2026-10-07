@@ -119,7 +119,13 @@ export default function Invitation() {
           void video
             .play()
             .then(() => setAutoplayBlocked(false))
-            .catch(() => setAutoplayBlocked(true));
+            .catch(() => {
+              // Sound refused (iOS without a prior unlock): play muted instead of
+              // sitting behind a play button, and offer a one-tap "sound on".
+              video.muted = true;
+              void video.play().catch(() => {});
+              setAutoplayBlocked(true);
+            });
         } else if (!video.paused) {
           video.pause();
         }
@@ -146,6 +152,14 @@ export default function Invitation() {
 
   const handleOpenStart = useCallback(() => {
     playFanfare(); // inside the tap, as mobile browsers require for audio
+    // iOS only lets a video play with sound if play() was first called during a tap.
+    // Start-and-stop it here (silently) so it can autoplay with sound when scrolled to.
+    const video = videoRef.current;
+    if (video) {
+      video.muted = false;
+      void video.play().catch(() => {});
+      video.pause();
+    }
     setStage("opening");
     window.scrollTo(0, 0);
     setTimeout(celebrate, 1100);
@@ -295,15 +309,17 @@ export default function Invitation() {
                 preload="metadata"
                 poster="/images/building.webp"
                 aria-label="A video tour of Water Park Restaurant and Party Center"
-                onPlay={() => setAutoplayBlocked(false)}
+                // the "tap for sound" pill stays while it plays muted; gone once sound is on
+                onPlay={(e) => !e.currentTarget.muted && setAutoplayBlocked(false)}
+                onVolumeChange={(e) => !e.currentTarget.muted && setAutoplayBlocked(false)}
               >
                 <source src="/videos/water-park.mp4" type="video/mp4" />
                 Your browser does not support embedded video.
               </video>
               {autoplayBlocked && (
                 <button type="button" className="experience__play" onClick={playVideoWithSound}>
-                  <span className="experience__play-icon" aria-hidden>▶</span>
-                  Play with sound
+                  <span className="experience__play-icon" aria-hidden>🔊</span>
+                  Tap for sound
                 </button>
               )}
             </div>
