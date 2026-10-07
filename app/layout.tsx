@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cinzel, Cormorant_Garamond, Montserrat } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const cinzel = Cinzel({ subsets: ["latin"], weight: ["600", "700", "900"], variable: "--font-display" });
@@ -40,7 +41,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preload" as="image" href="/images/curtain-portrait.webp" media="(max-aspect-ratio: 1/1)" />
         <link rel="preload" as="image" href="/images/curtain-landscape.webp" media="(min-aspect-ratio: 1/1)" />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
