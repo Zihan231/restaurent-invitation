@@ -893,6 +893,35 @@ html[data-freeze] .seal {
   color: var(--muted);
   padding: 8px;
 }
+/* developer acknowledgement */
+.credit {
+  width: 100%;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(212, 164, 55, 0.18);
+  font-size: 0.75rem;
+  line-height: 1.7;
+  color: var(--muted);
+  opacity: 0.85;
+}
+.credit p {
+  margin: 0;
+}
+.credit__by {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.credit__by a {
+  color: var(--gold-2);
+  font-weight: 600;
+}
+.credit__links a {
+  white-space: nowrap;
+}
+.credit a:hover {
+  color: var(--gold-1);
+}
+
 .footer__logo {
   width: 72px;
   opacity: 0.85;

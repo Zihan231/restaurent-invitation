@@ -391,6 +391,18 @@ export default function Invitation() {
             ↺ Raise the curtain again
           </button>
           <Image src="/images/logo.webp" alt="" width={120} height={83} className="footer__logo" />
+          <div className="credit">
+            <p className="credit__by">
+              Developed by <a href="https://xri.com.bd" target="_blank" rel="noopener noreferrer">XR Interactive</a>
+            </p>
+            <p className="credit__links">
+              <a href="https://xri.com.bd" target="_blank" rel="noopener noreferrer">xri.com.bd</a>
+              <span aria-hidden> · </span>
+              <a href="mailto:info@xri.com.bd">info@xri.com.bd</a>
+              <span aria-hidden> · </span>
+              <a href="tel:+8801684100800">+880 1684-100800</a>
+            </p>
+          </div>
         </motion.footer>
       </main>
     </>
