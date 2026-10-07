@@ -378,7 +378,6 @@ html[data-freeze] .seal {
 }
 .hero__visual {
   position: relative;
-  overflow-x: clip;
   width: calc(100% + 32px);
   margin: 4px -16px 0;
 }
@@ -736,6 +735,57 @@ html[data-freeze] .seal {
 }
 
 /* Larger screens: same column, more breathing room */
+/* Wide, short screens (laptops/desktops): fit the whole hero stage in one view */
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+  .hero {
+    height: 100svh;
+    min-height: 560px;
+    padding-top: 74px;
+    padding-bottom: 10px;
+  }
+  .hero__logo {
+    width: 64px;
+  }
+  .hero__title {
+    margin-top: 8px;
+  }
+  .hero__grand {
+    font-size: clamp(1rem, 3.6svh, 1.6rem);
+  }
+  .hero__opening {
+    font-size: clamp(2.2rem, 9svh, 4.4rem);
+  }
+  .hero__ribbon {
+    width: clamp(220px, 40svh, 340px);
+    margin-top: 2px;
+  }
+  .hero__visual {
+    flex: 1 1 0;
+    min-height: 0;
+    /* allowed to grow past the text column, centred between the drapes */
+    width: 170%;
+    max-width: 920px;
+    margin: -1svh 0 0;
+    display: flex;
+    justify-content: center;
+  }
+  .hero__building {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .hero__name {
+    margin-top: -4px;
+    font-size: clamp(0.9rem, 2.6svh, 1.2rem);
+  }
+  .scroll-cue {
+    margin-top: 8px;
+    height: 34px;
+    flex: none;
+  }
+}
+
 @media (min-width: 768px) {
   .page {
     padding-top: 16px;

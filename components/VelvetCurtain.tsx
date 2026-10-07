@@ -43,6 +43,8 @@ uniform vec3 uShape;   // open width at top / tie-back / floor (fraction of W)
 uniform float uTieY;   // tie-back height (fraction of H)
 uniform float uValH;   // valance band height (fraction of H)
 uniform float uSwagD;  // swag drop (fraction of H)
+uniform float uGatherN; // broad folds left showing once a drape is gathered
+uniform float uFoldPx;  // fold depth in CSS px (shallower on small screens)
 
 const float PI = 3.14159265;
 const float TAU = 6.2831853;
@@ -59,11 +61,13 @@ float openWidth(float y) {
   float tw = uShape.y;
   if (y < uTieY) {
     float k = (uTieY - y) / uTieY;
-    return tw + (uShape.x - tw) * pow(k, 1.7);
+    // gentle curve from the rail down to the rope
+    return tw + (uShape.x - tw) * pow(k, 1.25);
   }
   // below the rope the fabric flares out quickly, then falls straight to the floor
   float k = (y - uTieY) / (1.0 - uTieY);
-  return tw + (uShape.z - tw) * sin(k * PI * 0.5);
+  float flare = sin(k * PI * 0.5);
+  return tw + (uShape.z - tw) * flare;
 }
 
 // Inner edge of a drape at height y, as a fraction of the screen width.
@@ -107,18 +111,23 @@ vec4 drape(float x, float y, float seed, float dir, out float edge) {
   float vel = 30.0 * t * t * (1.0 - t) * (1.0 - t);
   float s = x / edge;                          // cloth coordinate: 0 wall .. 1 leading edge
   float c = clamp(0.5 / edge, 1.0, 7.0);       // how bunched the fabric is
-  // gathered fabric hides folds behind each other, so fewer (but deeper) folds show
-  float N = uFolds * mix(1.0, 0.5, smoothstep(1.0, 4.5, c));
+  // a gathered drape settles into a few broad folds that converge at the tie
+  float N = mix(uFolds, uGatherN, smoothstep(1.0, 3.0, c));
+  // taut, gathered fabric hangs in straight folds
+  float wig = mix(1.0, 0.25, smoothstep(1.0, 4.0, c));
   float sway = 0.22 * sin(uTime * 0.7 + s * 2.5 + seed) * y
              + vel * 0.9 * sin(TAU * 1.3 * s - uOpenT * 6.0 + seed) * (0.3 + 0.7 * y);
-  float p1 = TAU * N * s + seed + 0.9 * sin(y * 2.3 + seed * 1.7) + sway;
-  float p2 = TAU * N * 1.93 * s + seed * 3.1 + 1.3 * sin(y * 3.1 + seed) + sway * 1.4;
-  float p3 = TAU * N * 0.47 * s + seed * 5.0 + 0.7 * sin(y * 1.7 + seed * 2.0) + sway * 0.6;
-  float h = sin(p1) + 0.35 * sin(p2) + 0.5 * sin(p3);
-  float d = cos(p1) + 0.68 * cos(p2) + 0.24 * cos(p3);
-  float dy = cos(p1) * 2.07 * cos(y * 2.3 + seed * 1.7) + 1.4 * cos(p2) * cos(y * 3.1 + seed);
+  float p1 = TAU * N * s + seed + wig * 0.9 * sin(y * 2.3 + seed * 1.7) + sway;
+  float p2 = TAU * N * 1.93 * s + seed * 3.1 + wig * 1.3 * sin(y * 3.1 + seed) + sway * 1.4;
+  float p3 = TAU * N * 0.47 * s + seed * 5.0 + wig * 0.7 * sin(y * 1.7 + seed * 2.0) + sway * 0.6;
+  float h = sin(p1) + 0.12 * sin(p2) + 0.5 * sin(p3);
+  float d = cos(p1) + 0.23 * cos(p2) + 0.24 * cos(p3);
+  float dy = wig * cos(p1) * 2.07 * cos(y * 2.3 + seed * 1.7) + 1.4 * cos(p2) * cos(y * 3.1 + seed);
   float amp = mix(0.55, 1.0, y);
-  vec3 n = normalize(vec3(-d * amp * 0.75 * c * dir, -dy * amp * 0.08, 1.0));
+  // slope from real fold geometry: fold depth over the fold's on-screen width,
+  // so folds are soft where the drape is wide and tighten into creases at the tie
+  float slope = d * amp * TAU * uFoldPx * N / (edge * uCss.x) * 0.5;
+  vec3 n = normalize(vec3(-slope * dir, -dy * amp * 0.08, 1.0));
   float ao = 0.4 + 0.6 * smoothstep(-1.7, 1.5, h);
   ao *= 1.0 - 0.25 * smoothstep(0.93, 1.0, s);  // leading edge turns away
   vec3 col = velvet(n, dir > 0.0 ? x : 1.0 - x, ao, stageLight(vec2(dir > 0.0 ? x : 1.0 - x, y)));
@@ -292,7 +301,7 @@ export default function VelvetCurtain({ opening, reduced, onReady, onUnsupported
     const U = (n: string) => gl.getUniformLocation(prog, n);
     const u = {
       css: U("uCss"), res: U("uRes"), time: U("uTime"), openT: U("uOpenT"), dur: U("uDur"), lag: U("uLag"),
-      folds: U("uFolds"), swags: U("uSwags"), shape: U("uShape"), tie: U("uTieY"), valH: U("uValH"), swagD: U("uSwagD"),
+      folds: U("uFolds"), swags: U("uSwags"), shape: U("uShape"), tie: U("uTieY"), valH: U("uValH"), swagD: U("uSwagD"), gatherN: U("uGatherN"), foldPx: U("uFoldPx"),
     };
 
     const dur = reduced ? 1.2 : 2.9;
@@ -325,13 +334,17 @@ export default function VelvetCurtain({ opening, reduced, onReady, onUnsupported
       canvas.width = Math.max(1, Math.round(W * q));
       canvas.height = Math.max(1, Math.round(H * q));
       gl.viewport(0, 0, canvas.width, canvas.height);
-      const narrow = W < 640;
       gl.uniform2f(u.css, W, H);
       gl.uniform2f(u.res, canvas.width, canvas.height);
       gl.uniform1f(u.folds, Math.min(14, Math.max(6, Math.round(W / 2 / 30))));
-      gl.uniform1f(u.swags, Math.min(7, Math.max(3, Math.round(W / 240))));
-      if (narrow) gl.uniform3f(u.shape, 0.16, 0.06, 0.18);
-      else gl.uniform3f(u.shape, 0.2, 0.075, 0.22);
+      // phones: odd swag count (swag centred); wide screens: even, so the centre is a swag join above the logo
+      const swags = W < 900 ? 3 : Math.min(8, Math.max(4, 2 * Math.round(W / 480)));
+      gl.uniform1f(u.swags, swags);
+      gl.uniform1f(u.gatherN, W < 640 ? 5 : 6);
+      gl.uniform1f(u.foldPx, Math.min(7, Math.max(4.5, W * 0.006)));
+      // Tied-back drape size follows the curtain height (like real fabric), capped by width on phones.
+      const px = (wFrac: number, hFrac: number) => Math.min(W * wFrac, H * hFrac) / W;
+      gl.uniform3f(u.shape, px(0.16, 0.3), px(0.065, 0.1), px(0.16, 0.24));
       gl.uniform1f(u.valH, Math.min(0.05, 32 / H));
       gl.uniform1f(u.swagD, Math.min(0.09, 70 / H));
       if (settled) draw();
